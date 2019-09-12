@@ -1,0 +1,1 @@
+{"version":3,"file":"index.umd.bundle.js","sources":["../src/index.js"],"sourcesContent":["export const sum = (a, b) => a + b;\n"],"names":["sum","a","b"],"mappings":";;;;;;;;;;;;;;;KAAaA,GAAG,GAAG,SAANA,GAAM,CAACC,CAAD,EAAIC,CAAJ;CAAA,SAAUD,CAAC,GAAGC,CAAd;CAAA,CAAZ;;;;;;;;;;;;"}

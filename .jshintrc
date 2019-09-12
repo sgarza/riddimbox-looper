@@ -1,0 +1,20 @@
+{
+  "globals": {
+    "describe": true,
+    "it": true,
+    "expect": true
+  },
+  "esversion": 9,
+  "maxerr": 50,
+  "maxparams": 3,
+  "maxdepth": 3,
+  "maxstatements": 10,
+  "maxcomplexity": 5,
+  "eqeqeq": true,
+  "leanswitch": true,
+  "shadow": "outer",
+  "undef": true,
+  "unused": true,
+  "browser": true,
+  "node": true
+}

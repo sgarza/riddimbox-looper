@@ -1,0 +1,1 @@
+{"version":3,"file":"index.esm.bundle.js","sources":["../src/index.js"],"sourcesContent":["export const sum = (a, b) => a + b;\n"],"names":["sum","a","b"],"mappings":";;;;;;;;;IAAaA,GAAG,GAAG,SAANA,GAAM,CAACC,CAAD,EAAIC,CAAJ;SAAUD,CAAC,GAAGC,CAAd;CAAZ;;;;"}

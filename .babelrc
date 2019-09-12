@@ -1,0 +1,24 @@
+{
+  "env": {
+    "test": {
+      "presets": [
+        [
+          "@babel/env",
+          {
+            "modules": "cjs",
+          }
+        ]
+      ]
+    },
+    "build": {
+      "presets": [
+        [
+          "@babel/env",
+        ]
+      ],
+      "plugins": [
+        "@babel/plugin-proposal-class-properties"
+      ],
+    },
+  }
+}
