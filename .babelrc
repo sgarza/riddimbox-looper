@@ -8,7 +8,10 @@
             "modules": "cjs",
           }
         ]
-      ]
+      ],
+      "plugins": [
+        "@babel/plugin-proposal-class-properties"
+      ],
     },
     "build": {
       "presets": [
@@ -20,5 +23,15 @@
         "@babel/plugin-proposal-class-properties"
       ],
     },
+    "development": {
+      "presets": [
+        [
+          "@babel/env",
+        ]
+      ],
+      "plugins": [
+        "@babel/plugin-proposal-class-properties"
+      ],
+    }
   }
 }
