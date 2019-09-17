@@ -1,3 +1,8 @@
+import {
+  MEDIA_RECORDER_INACTIVE,
+  MEDIA_RECORDER_RECORDING
+} from "../constants";
+
 class ToneMediaRecorderProvider {
   constructor(Tone, MediaRecorder) {
     this.engine = Tone;
@@ -10,6 +15,12 @@ class ToneMediaRecorderProvider {
 
   set input(input) {
     input.connect(this.recorderStreamDestination);
+  }
+
+  startRecording() {
+    if (this.recorder.state === MEDIA_RECORDER_INACTIVE) {
+      this.recorder.start();
+    }
   }
 
   _setupMediaRecorder() {
