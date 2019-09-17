@@ -19,10 +19,7 @@ const {
   DEFAULT_BPM_VALUE,
   DEFAULT_SWING_VALUE,
   DEFAULT_SWING_SUBDIVISION_VALUE,
-  DEFAULT_TIME_SIGNATURE_VALUE,
-  MIN_TICKS,
-  MAX_TICKS,
-  PPQN
+  DEFAULT_TIME_SIGNATURE_VALUE
 } = transportConstants;
 
 let micInput;
@@ -67,13 +64,16 @@ describe("Looper", () => {
       state: MEDIA_RECORDER_INACTIVE,
       start() {
         recorderInstance.state = MEDIA_RECORDER_RECORDING;
+      },
+      stop() {
+        recorderInstance.state = MEDIA_RECORDER_INACTIVE;
       }
     };
     MediaRecorder = () => recorderInstance;
   });
 
   afterEach(() => {
-    Looper.mediaRecorderProvider = null;
+    jest.clearAllMocks();
   });
 
   describe("when ToneMediaRecorderProvider is not set", () => {
@@ -131,7 +131,7 @@ describe("Looper", () => {
   });
 
   describe("when the Transport Provider is set", () => {
-    it("should execute Looper.startRecording on Transport start", () => {
+    it("should execute Looper.startRecording on Transport starts", () => {
       const toneTransportProvider = new ToneTransportProvider(Tone);
       Transport.provider = toneTransportProvider;
 
@@ -150,6 +150,28 @@ describe("Looper", () => {
       Transport.start();
 
       expect(Looper.startRecording).toHaveBeenCalledTimes(1);
+    });
+
+    it("should execute Looper.stopRecording when Transport stops", () => {
+      const toneTransportProvider = new ToneTransportProvider(Tone);
+      Transport.provider = toneTransportProvider;
+
+      const mediaRecorderProvider = new ToneMediaRecorderProvider(
+        Tone,
+        MediaRecorder
+      );
+
+      const transportProvider = new RiddimBoxTransportProvider(Transport);
+
+      jest.spyOn(Looper, "stopRecording");
+      Looper.mediaRecorderProvider = mediaRecorderProvider;
+      Looper.transportProvider = transportProvider;
+      Looper.input = micInput;
+
+      Transport.start();
+      Transport.stop();
+
+      expect(Looper.stopRecording).toHaveBeenCalledTimes(1);
     });
   });
 });

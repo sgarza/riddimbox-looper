@@ -21,6 +21,10 @@ class ToneMediaRecorderProvider {
     this.recorder.start();
   }
 
+  stopRecording() {
+    this.recorder.stop();
+  }
+
   _setupMediaRecorder() {
     this.recorderStreamDestination = this.engine.context.createMediaStreamDestination();
     this.recorder = new this.MediaRecorder(

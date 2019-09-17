@@ -30,6 +30,10 @@ class Looper {
     Looper.mediaRecorderProvider.startRecording();
   }
 
+  static stopRecording() {
+    Looper.mediaRecorderProvider.stopRecording();
+  }
+
   static selectCurrentLoop() {
     Looper._throwIfTransportProviderNotSet();
   }
@@ -52,6 +56,7 @@ class Looper {
 
   static _setupTransportEvents() {
     this.transportProvider.on("start", Looper.startRecording);
+    this.transportProvider.on("stop", Looper.stopRecording);
   }
 }
 
