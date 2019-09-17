@@ -19,7 +19,8 @@ const {
   DEFAULT_BPM_VALUE,
   DEFAULT_SWING_VALUE,
   DEFAULT_SWING_SUBDIVISION_VALUE,
-  DEFAULT_TIME_SIGNATURE_VALUE
+  DEFAULT_TIME_SIGNATURE_VALUE,
+  PPQN
 } = transportConstants;
 
 let micInput;
@@ -172,6 +173,30 @@ describe("Looper", () => {
       Transport.stop();
 
       expect(Looper.stopRecording).toHaveBeenCalledTimes(1);
+    });
+
+    it("should execute Looper.restartRecording on each 'loop'", () => {
+      const toneTransportProvider = new ToneTransportProvider(Tone);
+      Transport.provider = toneTransportProvider;
+
+      const mediaRecorderProvider = new ToneMediaRecorderProvider(
+        Tone,
+        MediaRecorder
+      );
+
+      const transportProvider = new RiddimBoxTransportProvider(Transport);
+
+      jest.spyOn(Looper, "restartRecording");
+      Looper.mediaRecorderProvider = mediaRecorderProvider;
+      Looper.transportProvider = transportProvider;
+      Looper.input = micInput;
+
+      Transport.start();
+      for (let index = 0; index < PPQN * 5; index++) {
+        toneTransportProvider._tickHandler();
+      }
+
+      expect(Looper.restartRecording).toHaveBeenCalledTimes(1);
     });
   });
 });
