@@ -18,9 +18,7 @@ class ToneMediaRecorderProvider {
   }
 
   startRecording() {
-    if (this.recorder.state === MEDIA_RECORDER_INACTIVE) {
-      this.recorder.start();
-    }
+    this.recorder.start();
   }
 
   _setupMediaRecorder() {
