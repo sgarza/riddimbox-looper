@@ -5,3 +5,4 @@ export {
 export {
   default as RiddimBoxTransportProvider
 } from "./providers/riddimbox-transport-provider";
+export { default as constants } from "./constants";

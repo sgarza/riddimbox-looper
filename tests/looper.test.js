@@ -1,14 +1,18 @@
 import {
   Looper,
   ToneMediaRecorderProvider,
-  RiddimBoxTransportProvider
+  RiddimBoxTransportProvider,
+  constants
 } from "../src";
 
 import {
   Transport,
   ToneTransportProvider,
-  constants
+  constants as transportConstants
 } from "@riddimbox/transport";
+
+const { MEDIA_RECORDER_RECORDING, MEDIA_RECORDER_INACTIVE } = constants;
+
 const {
   TRANSPORT_STARTED,
   TRANSPORT_STOPPED,
@@ -19,12 +23,14 @@ const {
   MIN_TICKS,
   MAX_TICKS,
   PPQN
-} = constants;
+} = transportConstants;
 
 let micInput;
 let Tone;
 let MediaRecorder;
 let mockToneTransport;
+let recorderInstance;
+
 describe("Looper", () => {
   beforeEach(() => {
     micInput = {
@@ -57,9 +63,13 @@ describe("Looper", () => {
       Transport: { ...mockToneTransport }
     };
 
-    MediaRecorder = () => ({
-      start() {}
-    });
+    recorderInstance = {
+      state: MEDIA_RECORDER_INACTIVE,
+      start() {
+        recorderInstance.state = MEDIA_RECORDER_RECORDING;
+      }
+    };
+    MediaRecorder = () => recorderInstance;
   });
 
   afterEach(() => {
@@ -140,30 +150,6 @@ describe("Looper", () => {
       Transport.start();
 
       expect(Looper.startRecording).toHaveBeenCalledTimes(1);
-    });
-
-    it("should not execute mediaRecorder.recorder.start if Transport is already started", () => {
-      const toneTransportProvider = new ToneTransportProvider(Tone);
-      Transport.provider = toneTransportProvider;
-
-      const mediaRecorderProvider = new ToneMediaRecorderProvider(
-        Tone,
-        MediaRecorder
-      );
-
-      const transportProvider = new RiddimBoxTransportProvider(Transport);
-
-      Looper.mediaRecorderProvider = mediaRecorderProvider;
-      jest.spyOn(Looper.mediaRecorderProvider.recorder, "start");
-      Looper.transportProvider = transportProvider;
-      Looper.input = micInput;
-
-      Transport.start();
-      Transport.start();
-
-      expect(Looper.mediaRecorderProvider.recorder.start).toHaveBeenCalledTimes(
-        1
-      );
     });
   });
 });
