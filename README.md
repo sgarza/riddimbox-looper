@@ -1,26 +1,33 @@
-# Javascript library boilerplate
+# RiddimBox - Looper
 
-This repo contains the minimum code needed to create a Javascript library that can be used in either NodeJS and in the Browser in any possible way.
+WIP: A library that provides abtractions to record audio loops with support for multiple backends, currently it has support for `Tone.js`
 
-## Getting started
+## Requirements
 
-Clone this repository and install its dependencies:
+This library needs you to provide:
 
-```bash
-git clone --depth 1 https://github.com/sgarza/javascript-library-boilerplate my-module
-cd my-module
-npm install
-```
+- This library depends on [@riddimbox/transport](https://github.com/sgarza/riddimbox-transport)
 
-Open the [package.json](package.json) file and edit the value of the property `moduleName`. It's value will be name of the global variable used when the module is loaded via `<script src="module/path"></script>`.
+## Usage
 
-Remove your `.git` folder and start over `rmdir .git && git init`.
+### Initialization
 
+```javascript
+import {
+  Looper,
+  ToneMediaRecorderProvider,
+  RiddimBoxTransportProvider
+} from "@riddimbox/looper";
+// ... Transport/Metronome initialization
+// const micInput = get user media mic input
 
-## Build
+const recorderProvider = new ToneMediaRecorderProvider(Tone, MediaRecorder);
+const transportProvider = new RiddimBoxTransportProvider(Transport);
 
-```bash
-npm run build
+Looper.recorderProvider = recorderProvider;
+Looper.transportProvider = transportProvider;
+
+Looper.input = micInput;
 ```
 
 ## License
