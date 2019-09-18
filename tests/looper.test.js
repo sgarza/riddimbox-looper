@@ -1,3 +1,4 @@
+import "./url.mock";
 import {
   Looper,
   ToneMediaRecorderProvider,
@@ -28,6 +29,7 @@ let Tone;
 let MediaRecorder;
 let mockToneTransport;
 let recorderInstance;
+let toneTransportProvider;
 
 describe("Looper", () => {
   beforeEach(() => {
@@ -58,7 +60,9 @@ describe("Looper", () => {
           };
         }
       },
-      Transport: { ...mockToneTransport }
+      Transport: { ...mockToneTransport },
+      Buffer: jest.fn(),
+      Player: jest.fn()
     };
 
     recorderInstance = {
@@ -71,6 +75,9 @@ describe("Looper", () => {
       }
     };
     MediaRecorder = () => recorderInstance;
+
+    toneTransportProvider = new ToneTransportProvider(Tone);
+    Transport.provider = toneTransportProvider;
   });
 
   afterEach(() => {
@@ -133,9 +140,6 @@ describe("Looper", () => {
 
   describe("when the Transport Provider is set", () => {
     it("should execute Looper.startRecording on Transport starts", () => {
-      const toneTransportProvider = new ToneTransportProvider(Tone);
-      Transport.provider = toneTransportProvider;
-
       const mediaRecorderProvider = new ToneMediaRecorderProvider(
         Tone,
         MediaRecorder
@@ -154,9 +158,6 @@ describe("Looper", () => {
     });
 
     it("should execute Looper.stopRecording when Transport stops", () => {
-      const toneTransportProvider = new ToneTransportProvider(Tone);
-      Transport.provider = toneTransportProvider;
-
       const mediaRecorderProvider = new ToneMediaRecorderProvider(
         Tone,
         MediaRecorder
@@ -176,9 +177,6 @@ describe("Looper", () => {
     });
 
     it("should execute Looper.restartRecording on each 'loop'", () => {
-      const toneTransportProvider = new ToneTransportProvider(Tone);
-      Transport.provider = toneTransportProvider;
-
       const mediaRecorderProvider = new ToneMediaRecorderProvider(
         Tone,
         MediaRecorder
@@ -195,8 +193,36 @@ describe("Looper", () => {
       for (let index = 0; index < PPQN * 5; index++) {
         toneTransportProvider._tickHandler();
       }
+      Looper.mediaRecorderProvider._onDataAvailableHandler({ data: [1, 0] });
 
       expect(Looper.restartRecording).toHaveBeenCalledTimes(1);
+    });
+
+    it("should save the the current loop when selectCurrentLoop is activated", () => {
+      const mediaRecorderProvider = new ToneMediaRecorderProvider(
+        Tone,
+        MediaRecorder
+      );
+
+      const transportProvider = new RiddimBoxTransportProvider(Transport);
+
+      jest.spyOn(Looper, "restartRecording");
+      Looper.mediaRecorderProvider = mediaRecorderProvider;
+      Looper.transportProvider = transportProvider;
+      Looper.input = micInput;
+
+      Transport.start();
+      Looper.selectCurrentLoop();
+      for (let index = 0; index < PPQN * 5; index++) {
+        toneTransportProvider._tickHandler();
+      }
+      Looper.mediaRecorderProvider._onDataAvailableHandler({ data: [1, 0] });
+      mediaRecorderProvider.engine.Buffer.mock.calls[0][1]();
+
+      expect(Looper.restartRecording).toHaveBeenCalledTimes(1);
+      expect(Tone.Buffer).toHaveBeenCalledTimes(1);
+      expect(Tone.Player).toHaveBeenCalledTimes(1);
+      expect(Looper.loops).toHaveLength(1);
     });
   });
 });
