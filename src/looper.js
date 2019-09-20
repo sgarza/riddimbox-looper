@@ -9,7 +9,7 @@ class Looper {
 
   static get transportProvider() {
     Looper._throwIfTransportProviderNotSet();
-    return this._transportProvider;
+    return Looper._transportProvider;
   }
 
   static get loops() {
@@ -65,9 +65,9 @@ class Looper {
   }
 
   static _setupTransportEvents() {
-    this.transportProvider.on("start", Looper.startRecording);
-    this.transportProvider.on("stop", Looper.stopRecording);
-    this.transportProvider.on("loop", Looper.restartRecording);
+    Looper.transportProvider.on("start", Looper.startRecording);
+    Looper.transportProvider.on("stop", Looper.stopRecording);
+    Looper.transportProvider.on("loop", Looper.restartRecording);
   }
 }
 
