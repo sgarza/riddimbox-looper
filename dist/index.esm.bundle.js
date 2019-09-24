@@ -75,6 +75,16 @@ function () {
       Looper.mediaRecorderProvider.selectCurrentLoop = true;
     }
   }, {
+    key: "increaseCurrentLoopLength",
+    value: function increaseCurrentLoopLength() {
+      Looper.transportProvider.increaseCurrentLoopLength();
+    }
+  }, {
+    key: "decreaseCurrentLoopLength",
+    value: function decreaseCurrentLoopLength() {
+      Looper.transportProvider.decreaseCurrentLoopLength();
+    }
+  }, {
     key: "_throwIfMediaRecorderProvderNotSet",
     value: function _throwIfMediaRecorderProvderNotSet() {
       if (!Looper._mediaRecorderProvider) {
@@ -91,9 +101,9 @@ function () {
   }, {
     key: "_setupTransportEvents",
     value: function _setupTransportEvents() {
-      this.transportProvider.on("start", Looper.startRecording);
-      this.transportProvider.on("stop", Looper.stopRecording);
-      this.transportProvider.on("loop", Looper.restartRecording);
+      Looper.transportProvider.on("start", Looper.startRecording);
+      Looper.transportProvider.on("stop", Looper.stopRecording);
+      Looper.transportProvider.on("loop", Looper.restartRecording);
     }
   }, {
     key: "mediaRecorderProvider",
@@ -110,7 +120,7 @@ function () {
     get: function get() {
       Looper._throwIfTransportProviderNotSet();
 
-      return this._transportProvider;
+      return Looper._transportProvider;
     },
     set: function set(transportProvider) {
       Looper._transportProvider = transportProvider;
@@ -123,9 +133,19 @@ function () {
       return Looper.mediaRecorderProvider.loops;
     }
   }, {
+    key: "currentLoopLength",
+    get: function get() {
+      return Looper.transportProvider.currentLoopLength;
+    }
+  }, {
     key: "input",
     set: function set(input) {
       Looper.mediaRecorderProvider.input = input;
+    }
+  }, {
+    key: "output",
+    set: function set(output) {
+      Looper.mediaRecorderProvider.output = output;
     }
   }]);
 
@@ -148,6 +168,7 @@ function () {
     this.recorder = null;
     this.selectCurrentLoop = false;
     this.loops = [];
+    this._output = Tone.Master;
 
     this._setupMediaRecorder();
   }
@@ -188,6 +209,7 @@ function () {
     key: "_createBufferCallback",
     value: function _createBufferCallback(buffer) {
       var player = new this.engine.Player(buffer);
+      player.connect(this._output);
       this.loops.push({
         player: player
       });
@@ -197,10 +219,31 @@ function () {
     set: function set(input) {
       input.connect(this.recorderStreamDestination);
     }
+  }, {
+    key: "output",
+    set: function set(output) {
+      var _this2 = this;
+
+      this.loops.forEach(function (loop) {
+        loop.player.disconnect(_this2._output);
+        loop.player.connect(output);
+      });
+      this._output = output;
+    }
   }]);
 
   return ToneMediaRecorderProvider;
 }();
+
+var constants = {
+  MEDIA_RECORDER_RECORDING: "recording",
+  MEDIA_RECORDER_INACTIVE: "inactive",
+  MIN_LOOP_LENGTH: 4,
+  MAX_LOOP_LENGTH: 64
+};
+
+var MIN_LOOP_LENGTH = constants.MIN_LOOP_LENGTH,
+    MAX_LOOP_LENGTH = constants.MAX_LOOP_LENGTH;
 
 var RiddimBoxTransportProvider =
 /*#__PURE__*/
@@ -211,9 +254,9 @@ function () {
     _classCallCheck(this, RiddimBoxTransportProvider);
 
     this.transport = Transport;
-    this.loopLength = 4;
+    this.currentLoopLength = MIN_LOOP_LENGTH;
     this.transport.on("beat", function (beats) {
-      if (beats % _this.loopLength === 0) {
+      if (beats % _this.currentLoopLength === 0) {
         _this.transport.provider.emit("loop");
       }
     });
@@ -224,15 +267,32 @@ function () {
     value: function on(event, handler) {
       this.transport.on(event, handler);
     }
+  }, {
+    key: "increaseCurrentLoopLength",
+    value: function increaseCurrentLoopLength() {
+      var length = this.currentLoopLength + MIN_LOOP_LENGTH;
+
+      if (length > MAX_LOOP_LENGTH) {
+        length = MIN_LOOP_LENGTH;
+      }
+
+      this.currentLoopLength = length;
+    }
+  }, {
+    key: "decreaseCurrentLoopLength",
+    value: function decreaseCurrentLoopLength() {
+      var length = this.currentLoopLength - MIN_LOOP_LENGTH;
+
+      if (length < MIN_LOOP_LENGTH) {
+        length = MAX_LOOP_LENGTH;
+      }
+
+      this.currentLoopLength = length;
+    }
   }]);
 
   return RiddimBoxTransportProvider;
 }();
-
-var constants = {
-  MEDIA_RECORDER_RECORDING: "recording",
-  MEDIA_RECORDER_INACTIVE: "inactive"
-};
 
 export { Looper, RiddimBoxTransportProvider, ToneMediaRecorderProvider, constants };
 //# sourceMappingURL=index.esm.bundle.js.map
