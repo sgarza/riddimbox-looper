@@ -224,5 +224,80 @@ describe("Looper", () => {
       expect(Tone.Player).toHaveBeenCalledTimes(1);
       expect(Looper.loops).toHaveLength(1);
     });
+
+    it("should increase the lenght of the current loop by MIN_LOOP_LENGTH measures when #increaseCurrentLoopLength is executed", () => {
+      const mediaRecorderProvider = new ToneMediaRecorderProvider(
+        Tone,
+        MediaRecorder
+      );
+
+      const transportProvider = new RiddimBoxTransportProvider(Transport);
+      Looper.mediaRecorderProvider = mediaRecorderProvider;
+      Looper.transportProvider = transportProvider;
+      Looper.input = micInput;
+
+      expect(Looper.currentLoopLength).toBe(4);
+
+      Looper.increaseCurrentLoopLength();
+
+      expect(Looper.currentLoopLength).toBe(8);
+    });
+
+    it("should cycle to MIN_LOOP_LENGTH when increasing and reaching MAX_LOOP_LENGTH", () => {
+      const mediaRecorderProvider = new ToneMediaRecorderProvider(
+        Tone,
+        MediaRecorder
+      );
+
+      const transportProvider = new RiddimBoxTransportProvider(Transport);
+      Looper.mediaRecorderProvider = mediaRecorderProvider;
+      Looper.transportProvider = transportProvider;
+      Looper.input = micInput;
+
+      expect(Looper.currentLoopLength).toBe(4);
+
+      for (let index = 0; index < 16; index++) {
+        Looper.increaseCurrentLoopLength();
+      }
+
+      expect(Looper.currentLoopLength).toBe(4);
+    });
+
+    it("should decrease the lenght of the current loop by MIN_LOOP_LENGTH measures when #decreaseCurrentLoopLength is executed", () => {
+      const mediaRecorderProvider = new ToneMediaRecorderProvider(
+        Tone,
+        MediaRecorder
+      );
+
+      const transportProvider = new RiddimBoxTransportProvider(Transport);
+      Looper.mediaRecorderProvider = mediaRecorderProvider;
+      Looper.transportProvider = transportProvider;
+      Looper.input = micInput;
+
+      expect(Looper.currentLoopLength).toBe(4);
+
+      Looper.increaseCurrentLoopLength();
+      Looper.decreaseCurrentLoopLength();
+
+      expect(Looper.currentLoopLength).toBe(4);
+    });
+
+    it("should cycle to MAX_LOOP_LENGTH when decreasing and reaching MIN_LOOP_LENGTH", () => {
+      const mediaRecorderProvider = new ToneMediaRecorderProvider(
+        Tone,
+        MediaRecorder
+      );
+
+      const transportProvider = new RiddimBoxTransportProvider(Transport);
+      Looper.mediaRecorderProvider = mediaRecorderProvider;
+      Looper.transportProvider = transportProvider;
+      Looper.input = micInput;
+
+      expect(Looper.currentLoopLength).toBe(4);
+
+      Looper.decreaseCurrentLoopLength();
+
+      expect(Looper.currentLoopLength).toBe(64);
+    });
   });
 });

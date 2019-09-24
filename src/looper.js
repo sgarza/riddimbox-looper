@@ -16,6 +16,10 @@ class Looper {
     return Looper.mediaRecorderProvider.loops;
   }
 
+  static get currentLoopLength() {
+    return Looper.transportProvider.currentLoopLength;
+  }
+
   static set mediaRecorderProvider(mediaRecorderProvider) {
     Looper._mediaRecorderProvider = mediaRecorderProvider;
   }
@@ -46,6 +50,14 @@ class Looper {
   static selectCurrentLoop() {
     Looper._throwIfTransportProviderNotSet();
     Looper.mediaRecorderProvider.selectCurrentLoop = true;
+  }
+
+  static increaseCurrentLoopLength() {
+    Looper.transportProvider.increaseCurrentLoopLength();
+  }
+
+  static decreaseCurrentLoopLength() {
+    Looper.transportProvider.decreaseCurrentLoopLength();
   }
 
   static _throwIfMediaRecorderProvderNotSet() {
