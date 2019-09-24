@@ -34,6 +34,10 @@ class Looper {
     Looper.mediaRecorderProvider.input = input;
   }
 
+  static set output(output) {
+    Looper.mediaRecorderProvider.output = output;
+  }
+
   static startRecording() {
     Looper.mediaRecorderProvider.startRecording();
   }

@@ -6,12 +6,22 @@ class ToneMediaRecorderProvider {
     this.recorder = null;
     this.selectCurrentLoop = false;
     this.loops = [];
+    this._output = Tone.Master;
 
     this._setupMediaRecorder();
   }
 
   set input(input) {
     input.connect(this.recorderStreamDestination);
+  }
+
+  set output(output) {
+    this.loops.forEach(loop => {
+      loop.player.disconnect(this._output);
+      loop.player.connect(output);
+    });
+
+    this._output = output;
   }
 
   startRecording() {
@@ -49,6 +59,8 @@ class ToneMediaRecorderProvider {
 
   _createBufferCallback(buffer) {
     const player = new this.engine.Player(buffer);
+
+    player.connect(this._output);
 
     this.loops.push({
       player

@@ -62,7 +62,11 @@ describe("Looper", () => {
       },
       Transport: { ...mockToneTransport },
       Buffer: jest.fn(),
-      Player: jest.fn()
+      Player: jest.fn().mockImplementation(() => ({
+        connect: jest.fn(),
+        disconnect: jest.fn()
+      })),
+      Master: {}
     };
 
     recorderInstance = {
@@ -298,6 +302,117 @@ describe("Looper", () => {
       Looper.decreaseCurrentLoopLength();
 
       expect(Looper.currentLoopLength).toBe(64);
+    });
+
+    it("should connect the looper output to the master output if no output is specified", () => {
+      const mediaRecorderProvider = new ToneMediaRecorderProvider(
+        Tone,
+        MediaRecorder
+      );
+
+      const transportProvider = new RiddimBoxTransportProvider(Transport);
+      Looper.mediaRecorderProvider = mediaRecorderProvider;
+      Looper.transportProvider = transportProvider;
+      Looper.input = micInput;
+
+      Transport.start();
+      Looper.selectCurrentLoop();
+      for (let index = 0; index < PPQN * 5; index++) {
+        toneTransportProvider._tickHandler();
+      }
+      Looper.mediaRecorderProvider._createBufferCallback({ data: [1, 0] });
+
+      expect(mediaRecorderProvider.loops).toHaveLength(1);
+
+      expect(
+        mediaRecorderProvider.loops[0].player.connect
+      ).toHaveBeenCalledTimes(1);
+
+      expect(
+        mediaRecorderProvider.loops[0].player.connect.mock.calls[0][0]
+      ).toBe(Tone.Master);
+    });
+
+    it("should connect the looper output to the specified audio node", () => {
+      const mediaRecorderProvider = new ToneMediaRecorderProvider(
+        Tone,
+        MediaRecorder
+      );
+
+      const transportProvider = new RiddimBoxTransportProvider(Transport);
+      Looper.mediaRecorderProvider = mediaRecorderProvider;
+      Looper.transportProvider = transportProvider;
+      Looper.input = micInput;
+
+      const output = jest.fn();
+      expect(() => {
+        Looper.output = output;
+      }).not.toThrow();
+
+      Transport.start();
+      Looper.selectCurrentLoop();
+      for (let index = 0; index < PPQN * 5; index++) {
+        toneTransportProvider._tickHandler();
+      }
+      Looper.mediaRecorderProvider._createBufferCallback({ data: [1, 0] });
+
+      expect(mediaRecorderProvider.loops).toHaveLength(1);
+
+      expect(
+        mediaRecorderProvider.loops[0].player.connect
+      ).toHaveBeenCalledTimes(1);
+
+      expect(
+        mediaRecorderProvider.loops[0].player.connect.mock.calls[0][0]
+      ).toBe(output);
+    });
+
+    it("should disconnect existing loops from previous output when specifying a new output", () => {
+      const mediaRecorderProvider = new ToneMediaRecorderProvider(
+        Tone,
+        MediaRecorder
+      );
+
+      const transportProvider = new RiddimBoxTransportProvider(Transport);
+      Looper.mediaRecorderProvider = mediaRecorderProvider;
+      Looper.transportProvider = transportProvider;
+      Looper.input = micInput;
+
+      Transport.start();
+      Looper.selectCurrentLoop();
+      for (let index = 0; index < PPQN * 5; index++) {
+        toneTransportProvider._tickHandler();
+      }
+      Looper.mediaRecorderProvider._createBufferCallback({ data: [1, 0] });
+
+      expect(mediaRecorderProvider.loops).toHaveLength(1);
+
+      expect(
+        mediaRecorderProvider.loops[0].player.connect
+      ).toHaveBeenCalledTimes(1);
+
+      expect(
+        mediaRecorderProvider.loops[0].player.connect.mock.calls[0][0]
+      ).toBe(Tone.Master);
+
+      const output = jest.fn();
+      expect(() => {
+        Looper.output = output;
+      }).not.toThrow();
+
+      expect(
+        mediaRecorderProvider.loops[0].player.disconnect
+      ).toHaveBeenCalledTimes(1);
+      expect(
+        mediaRecorderProvider.loops[0].player.connect
+      ).toHaveBeenCalledTimes(2);
+
+      expect(
+        mediaRecorderProvider.loops[0].player.disconnect.mock.calls[0][0]
+      ).toBe(Tone.Master);
+      expect(
+        mediaRecorderProvider.loops[0].player.connect.mock.calls[1][0]
+      ).toBe(output);
     });
   });
 });
