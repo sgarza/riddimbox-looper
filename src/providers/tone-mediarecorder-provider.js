@@ -1,3 +1,6 @@
+import constants from "../constants";
+const { PPQN } = constants;
+
 class ToneMediaRecorderProvider {
   constructor(Tone, MediaRecorder) {
     this.engine = Tone;
@@ -61,6 +64,10 @@ class ToneMediaRecorderProvider {
     const player = new this.engine.Player(buffer);
 
     player.connect(this._output);
+    const { bpm } = this.engine.Transport;
+    const startTimeOffset = bpm.ticksToTime(this.engine.Transport.ticks % PPQN);
+
+    player.start(this.engine.context.currentTime, startTimeOffset);
 
     this.loops.push({
       player

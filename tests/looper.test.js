@@ -12,7 +12,11 @@ import {
   constants as transportConstants
 } from "@riddimbox/transport";
 
-const { MEDIA_RECORDER_RECORDING, MEDIA_RECORDER_INACTIVE } = constants;
+const {
+  MEDIA_RECORDER_RECORDING,
+  MEDIA_RECORDER_INACTIVE,
+  DEFAULT_TICKS_TO_TIME_VALUE
+} = constants;
 
 const {
   TRANSPORT_STARTED,
@@ -45,7 +49,12 @@ describe("Looper", () => {
         Tone.Transport.state = TRANSPORT_STOPPED;
       },
       state: TRANSPORT_STOPPED,
-      bpm: { value: DEFAULT_BPM_VALUE },
+      bpm: {
+        value: DEFAULT_BPM_VALUE,
+        ticksToTime: jest
+          .fn()
+          .mockImplementation(() => DEFAULT_TICKS_TO_TIME_VALUE)
+      },
       swing: DEFAULT_SWING_VALUE,
       swingSubdivision: DEFAULT_SWING_SUBDIVISION_VALUE,
       timeSignature: DEFAULT_TIME_SIGNATURE_VALUE,
@@ -58,13 +67,15 @@ describe("Looper", () => {
           return {
             stream: {}
           };
-        }
+        },
+        currentTime: 1
       },
       Transport: { ...mockToneTransport },
       Buffer: jest.fn(),
       Player: jest.fn().mockImplementation(() => ({
         connect: jest.fn(),
-        disconnect: jest.fn()
+        disconnect: jest.fn(),
+        start: jest.fn()
       })),
       Master: {}
     };
@@ -329,8 +340,8 @@ describe("Looper", () => {
       ).toHaveBeenCalledTimes(1);
 
       expect(
-        mediaRecorderProvider.loops[0].player.connect.mock.calls[0][0]
-      ).toBe(Tone.Master);
+        mediaRecorderProvider.loops[0].player.connect
+      ).toHaveBeenCalledWith(Tone.Master);
     });
 
     it("should connect the looper output to the specified audio node", () => {
@@ -363,8 +374,8 @@ describe("Looper", () => {
       ).toHaveBeenCalledTimes(1);
 
       expect(
-        mediaRecorderProvider.loops[0].player.connect.mock.calls[0][0]
-      ).toBe(output);
+        mediaRecorderProvider.loops[0].player.connect
+      ).toHaveBeenCalledWith(output);
     });
 
     it("should disconnect existing loops from previous output when specifying a new output", () => {
@@ -392,8 +403,8 @@ describe("Looper", () => {
       ).toHaveBeenCalledTimes(1);
 
       expect(
-        mediaRecorderProvider.loops[0].player.connect.mock.calls[0][0]
-      ).toBe(Tone.Master);
+        mediaRecorderProvider.loops[0].player.connect
+      ).toHaveBeenCalledWith(Tone.Master);
 
       const output = jest.fn();
       expect(() => {
@@ -408,11 +419,39 @@ describe("Looper", () => {
       ).toHaveBeenCalledTimes(2);
 
       expect(
-        mediaRecorderProvider.loops[0].player.disconnect.mock.calls[0][0]
-      ).toBe(Tone.Master);
+        mediaRecorderProvider.loops[0].player.disconnect
+      ).toHaveBeenCalledWith(Tone.Master);
+
       expect(
-        mediaRecorderProvider.loops[0].player.connect.mock.calls[1][0]
-      ).toBe(output);
+        mediaRecorderProvider.loops[0].player.connect
+      ).toHaveBeenCalledWith(output);
+    });
+
+    it("should start playing the just added loop", () => {
+      const mediaRecorderProvider = new ToneMediaRecorderProvider(
+        Tone,
+        MediaRecorder
+      );
+
+      const transportProvider = new RiddimBoxTransportProvider(Transport);
+      Looper.mediaRecorderProvider = mediaRecorderProvider;
+      Looper.transportProvider = transportProvider;
+      Looper.input = micInput;
+
+      Transport.start();
+      Looper.selectCurrentLoop();
+      for (let index = 0; index < PPQN * 5; index++) {
+        toneTransportProvider._tickHandler();
+      }
+      Looper.mediaRecorderProvider._createBufferCallback({ data: [1, 0] });
+
+      expect(mediaRecorderProvider.loops[0].player.start).toHaveBeenCalledTimes(
+        1
+      );
+      expect(mediaRecorderProvider.loops[0].player.start).toHaveBeenCalledWith(
+        Tone.context.currentTime,
+        DEFAULT_TICKS_TO_TIME_VALUE
+      );
     });
   });
 });
