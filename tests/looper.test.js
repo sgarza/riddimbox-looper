@@ -427,7 +427,7 @@ describe("Looper", () => {
       ).toHaveBeenCalledWith(output);
     });
 
-    it("should start playing the just added loop", () => {
+    it("should start playing the just saved loop", () => {
       const mediaRecorderProvider = new ToneMediaRecorderProvider(
         Tone,
         MediaRecorder
