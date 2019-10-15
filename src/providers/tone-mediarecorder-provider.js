@@ -1,5 +1,5 @@
 import constants from "../constants";
-const { PPQN } = constants;
+const { PPQN, MIN_LOOP_LENGTH } = constants;
 
 class ToneMediaRecorderProvider {
   constructor(Tone, MediaRecorder) {
@@ -8,10 +8,20 @@ class ToneMediaRecorderProvider {
     this.recorderStreamDestination = null;
     this.recorder = null;
     this.selectCurrentLoop = false;
+    this.currentLoopLength = MIN_LOOP_LENGTH;
     this.loops = [];
     this._output = Tone.Master;
 
     this._setupMediaRecorder();
+  }
+
+  get ticksToTime() {
+    const { bpm } = this.engine.Transport;
+    return bpm.ticksToTime(this.engine.Transport.ticks % PPQN);
+  }
+
+  get currentTime() {
+    return this.engine.context.currentTime;
   }
 
   set input(input) {
@@ -64,12 +74,13 @@ class ToneMediaRecorderProvider {
     const player = new this.engine.Player(buffer);
 
     player.connect(this._output);
-    const { bpm } = this.engine.Transport;
-    const startTimeOffset = bpm.ticksToTime(this.engine.Transport.ticks % PPQN);
 
-    player.start(this.engine.context.currentTime, startTimeOffset);
+    const startTimeOffset = this.ticksToTime;
+
+    player.start(this.currentTime, startTimeOffset);
 
     this.loops.push({
+      length: this.currentLoopLength,
       player
     });
   }
