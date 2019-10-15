@@ -12,7 +12,7 @@ import {
   constants as transportConstants
 } from "@riddimbox/transport";
 
-import { createLoopWithLengthOf, playbackBeats } from "./helpers";
+import { createLoopWithLengthOf, playbackFor } from "./helpers";
 
 const {
   MEDIA_RECORDER_RECORDING,
@@ -207,7 +207,7 @@ describe("Looper", () => {
       Looper.input = micInput;
 
       Transport.start();
-      playbackBeats(5, toneTransportProvider);
+      playbackFor(5, toneTransportProvider);
       Looper.mediaRecorderProvider._onDataAvailableHandler({ data: [1, 0] });
 
       expect(Looper.restartRecording).toHaveBeenCalledTimes(1);
@@ -228,7 +228,7 @@ describe("Looper", () => {
 
       Transport.start();
       Looper.selectCurrentLoop();
-      playbackBeats(5, toneTransportProvider);
+      playbackFor(5, toneTransportProvider);
       Looper.mediaRecorderProvider._onDataAvailableHandler({ data: [1, 0] });
       mediaRecorderProvider.engine.Buffer.mock.calls[0][1]();
 
@@ -454,7 +454,7 @@ describe("Looper", () => {
         1
       );
 
-      playbackBeats(4, toneTransportProvider);
+      playbackFor(4, toneTransportProvider);
 
       expect(mediaRecorderProvider.loops[0].player.start).toHaveBeenCalledTimes(
         2
@@ -479,7 +479,7 @@ describe("Looper", () => {
         1
       );
 
-      playbackBeats(8, toneTransportProvider);
+      playbackFor(8, toneTransportProvider);
 
       expect(mediaRecorderProvider.loops[0].player.start).toHaveBeenCalledTimes(
         2
@@ -509,7 +509,7 @@ describe("Looper", () => {
 
       expect(mediaRecorderProvider.loops).toHaveLength(2);
 
-      playbackBeats(8, toneTransportProvider);
+      playbackFor(8, toneTransportProvider);
 
       expect(mediaRecorderProvider.loops[0].player.start).toHaveBeenCalledTimes(
         5
