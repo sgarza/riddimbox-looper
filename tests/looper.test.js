@@ -454,7 +454,7 @@ describe("Looper", () => {
       );
     });
 
-    it("should restart the saved loop in the correct beat", () => {
+    it("should restart the saved loop in the correct beat (4 beats)", () => {
       const mediaRecorderProvider = new ToneMediaRecorderProvider(
         Tone,
         MediaRecorder
@@ -480,6 +480,82 @@ describe("Looper", () => {
       }
 
       expect(mediaRecorderProvider.loops[0].player.start).toHaveBeenCalledTimes(
+        2
+      );
+    });
+
+    it("should restart the saved loop in the correct beat (8 beats)", () => {
+      const mediaRecorderProvider = new ToneMediaRecorderProvider(
+        Tone,
+        MediaRecorder
+      );
+
+      const transportProvider = new RiddimBoxTransportProvider(Transport);
+      Looper.mediaRecorderProvider = mediaRecorderProvider;
+      Looper.transportProvider = transportProvider;
+      Looper.input = micInput;
+
+      Transport.start();
+      Looper.increaseCurrentLoopLength();
+      Looper.selectCurrentLoop();
+      for (let index = 0; index < PPQN * 8; index++) {
+        toneTransportProvider._tickHandler();
+      }
+      Looper.mediaRecorderProvider._createBufferCallback({ data: [1, 0] });
+
+      expect(mediaRecorderProvider.loops[0].player.start).toHaveBeenCalledTimes(
+        1
+      );
+
+      for (let index = 0; index < PPQN * 8; index++) {
+        toneTransportProvider._tickHandler();
+      }
+
+      expect(mediaRecorderProvider.loops[0].player.start).toHaveBeenCalledTimes(
+        2
+      );
+    });
+
+    it("should restart the saved loops in the correct beat (4 beats && 8 beats)", () => {
+      const mediaRecorderProvider = new ToneMediaRecorderProvider(
+        Tone,
+        MediaRecorder
+      );
+
+      const transportProvider = new RiddimBoxTransportProvider(Transport);
+      Looper.mediaRecorderProvider = mediaRecorderProvider;
+      Looper.transportProvider = transportProvider;
+      Looper.input = micInput;
+
+      Transport.start();
+
+      Looper.selectCurrentLoop();
+
+      for (let index = 0; index < PPQN * 4; index++) {
+        toneTransportProvider._tickHandler();
+      }
+      Looper.mediaRecorderProvider._createBufferCallback({ data: [1, 0] });
+
+      expect(mediaRecorderProvider.loops[0].player.start).toHaveBeenCalledTimes(
+        1
+      );
+
+      Looper.increaseCurrentLoopLength();
+      for (let index = 0; index < PPQN * 8; index++) {
+        toneTransportProvider._tickHandler();
+      }
+      Looper.mediaRecorderProvider._createBufferCallback({ data: [1, 0] });
+
+      expect(mediaRecorderProvider.loops).toHaveLength(2);
+
+      for (let index = 0; index < PPQN * 8; index++) {
+        toneTransportProvider._tickHandler();
+      }
+
+      expect(mediaRecorderProvider.loops[0].player.start).toHaveBeenCalledTimes(
+        5
+      );
+      expect(mediaRecorderProvider.loops[1].player.start).toHaveBeenCalledTimes(
         2
       );
     });
