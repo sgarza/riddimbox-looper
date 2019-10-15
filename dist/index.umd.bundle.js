@@ -84,11 +84,24 @@
       key: "increaseCurrentLoopLength",
       value: function increaseCurrentLoopLength() {
         Looper.transportProvider.increaseCurrentLoopLength();
+        Looper.mediaRecorderProvider.currentLoopLength = Looper.currentLoopLength;
       }
     }, {
       key: "decreaseCurrentLoopLength",
       value: function decreaseCurrentLoopLength() {
         Looper.transportProvider.decreaseCurrentLoopLength();
+        Looper.mediaRecorderProvider.currentLoopLength = Looper.currentLoopLength;
+      }
+    }, {
+      key: "playbackLoops",
+      value: function playbackLoops(_ref) {
+        var totalBeats = _ref.totalBeats;
+        var startTimeOffset = Looper.mediaRecorderProvider.ticksToTime;
+        Looper.loops.filter(function (loop) {
+          return totalBeats % loop.length === 0;
+        }).forEach(function (loop) {
+          return loop.player.start(Looper.mediaRecorderProvider.currentTime, startTimeOffset);
+        });
       }
     }, {
       key: "_throwIfMediaRecorderProvderNotSet",
@@ -110,6 +123,7 @@
         Looper.transportProvider.on("start", Looper.startRecording);
         Looper.transportProvider.on("stop", Looper.stopRecording);
         Looper.transportProvider.on("loop", Looper.restartRecording);
+        Looper.transportProvider.on("beat", Looper.playbackLoops);
       }
     }, {
       key: "mediaRecorderProvider",
@@ -162,6 +176,17 @@
 
   _defineProperty(Looper, "_transportProvider", null);
 
+  var constants = {
+    MEDIA_RECORDER_RECORDING: "recording",
+    MEDIA_RECORDER_INACTIVE: "inactive",
+    MIN_LOOP_LENGTH: 4,
+    MAX_LOOP_LENGTH: 64,
+    DEFAULT_TICKS_TO_TIME_VALUE: 25
+  };
+
+  var PPQN = constants.PPQN,
+      MIN_LOOP_LENGTH = constants.MIN_LOOP_LENGTH;
+
   var ToneMediaRecorderProvider =
   /*#__PURE__*/
   function () {
@@ -173,6 +198,7 @@
       this.recorderStreamDestination = null;
       this.recorder = null;
       this.selectCurrentLoop = false;
+      this.currentLoopLength = MIN_LOOP_LENGTH;
       this.loops = [];
       this._output = Tone.Master;
 
@@ -216,9 +242,23 @@
       value: function _createBufferCallback(buffer) {
         var player = new this.engine.Player(buffer);
         player.connect(this._output);
+        var startTimeOffset = this.ticksToTime;
+        player.start(this.currentTime, startTimeOffset);
         this.loops.push({
+          length: this.currentLoopLength,
           player: player
         });
+      }
+    }, {
+      key: "ticksToTime",
+      get: function get() {
+        var bpm = this.engine.Transport.bpm;
+        return bpm.ticksToTime(this.engine.Transport.ticks % PPQN);
+      }
+    }, {
+      key: "currentTime",
+      get: function get() {
+        return this.engine.context.currentTime;
       }
     }, {
       key: "input",
@@ -241,14 +281,7 @@
     return ToneMediaRecorderProvider;
   }();
 
-  var constants = {
-    MEDIA_RECORDER_RECORDING: "recording",
-    MEDIA_RECORDER_INACTIVE: "inactive",
-    MIN_LOOP_LENGTH: 4,
-    MAX_LOOP_LENGTH: 64
-  };
-
-  var MIN_LOOP_LENGTH = constants.MIN_LOOP_LENGTH,
+  var MIN_LOOP_LENGTH$1 = constants.MIN_LOOP_LENGTH,
       MAX_LOOP_LENGTH = constants.MAX_LOOP_LENGTH;
 
   var RiddimBoxTransportProvider =
@@ -260,8 +293,10 @@
       _classCallCheck(this, RiddimBoxTransportProvider);
 
       this.transport = Transport;
-      this.currentLoopLength = MIN_LOOP_LENGTH;
-      this.transport.on("beat", function (beats) {
+      this.currentLoopLength = MIN_LOOP_LENGTH$1;
+      this.transport.on("beat", function (_ref) {
+        var beats = _ref.beats;
+
         if (beats % _this.currentLoopLength === 0) {
           _this.transport.provider.emit("loop");
         }
@@ -276,10 +311,10 @@
     }, {
       key: "increaseCurrentLoopLength",
       value: function increaseCurrentLoopLength() {
-        var length = this.currentLoopLength + MIN_LOOP_LENGTH;
+        var length = this.currentLoopLength + MIN_LOOP_LENGTH$1;
 
         if (length > MAX_LOOP_LENGTH) {
-          length = MIN_LOOP_LENGTH;
+          length = MIN_LOOP_LENGTH$1;
         }
 
         this.currentLoopLength = length;
@@ -287,9 +322,9 @@
     }, {
       key: "decreaseCurrentLoopLength",
       value: function decreaseCurrentLoopLength() {
-        var length = this.currentLoopLength - MIN_LOOP_LENGTH;
+        var length = this.currentLoopLength - MIN_LOOP_LENGTH$1;
 
-        if (length < MIN_LOOP_LENGTH) {
+        if (length < MIN_LOOP_LENGTH$1) {
           length = MAX_LOOP_LENGTH;
         }
 
