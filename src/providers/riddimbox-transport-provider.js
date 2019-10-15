@@ -6,7 +6,7 @@ class RiddimBoxTransportProvider {
     this.transport = Transport;
     this.currentLoopLength = MIN_LOOP_LENGTH;
 
-    this.transport.on("beat", beats => {
+    this.transport.on("beat", ({ beats }) => {
       if (beats % this.currentLoopLength === 0) {
         this.transport.provider.emit("loop");
       }

@@ -58,10 +58,25 @@ class Looper {
 
   static increaseCurrentLoopLength() {
     Looper.transportProvider.increaseCurrentLoopLength();
+    Looper.mediaRecorderProvider.currentLoopLength = Looper.currentLoopLength;
   }
 
   static decreaseCurrentLoopLength() {
     Looper.transportProvider.decreaseCurrentLoopLength();
+    Looper.mediaRecorderProvider.currentLoopLength = Looper.currentLoopLength;
+  }
+
+  static playbackLoops({ beats }) {
+    const startTimeOffset = Looper.mediaRecorderProvider.ticksToTime;
+
+    Looper.loops
+      .filter(loop => beats % loop.length === 0)
+      .forEach(loop =>
+        loop.player.start(
+          Looper.mediaRecorderProvider.currentTime,
+          startTimeOffset
+        )
+      );
   }
 
   static _throwIfMediaRecorderProvderNotSet() {
@@ -84,6 +99,7 @@ class Looper {
     Looper.transportProvider.on("start", Looper.startRecording);
     Looper.transportProvider.on("stop", Looper.stopRecording);
     Looper.transportProvider.on("loop", Looper.restartRecording);
+    Looper.transportProvider.on("beat", Looper.playbackLoops);
   }
 }
 
