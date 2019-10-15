@@ -66,11 +66,11 @@ class Looper {
     Looper.mediaRecorderProvider.currentLoopLength = Looper.currentLoopLength;
   }
 
-  static playbackLoops({ beats }) {
+  static playbackLoops({ totalBeats }) {
     const startTimeOffset = Looper.mediaRecorderProvider.ticksToTime;
 
     Looper.loops
-      .filter(loop => beats % loop.length === 0)
+      .filter(loop => totalBeats % loop.length === 0)
       .forEach(loop =>
         loop.player.start(
           Looper.mediaRecorderProvider.currentTime,
