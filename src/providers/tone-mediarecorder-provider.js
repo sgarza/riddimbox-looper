@@ -81,6 +81,7 @@ class ToneMediaRecorderProvider {
 
     this.loops.push({
       length: this.currentLoopLength,
+      enabled: true,
       player
     });
   }

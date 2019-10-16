@@ -519,4 +519,38 @@ describe("Looper", () => {
       );
     });
   });
+  it("should prevent the playback of a loop if the loop is disabled", () => {
+    const mediaRecorderProvider = new ToneMediaRecorderProvider(
+      Tone,
+      MediaRecorder
+    );
+
+    const transportProvider = new RiddimBoxTransportProvider(Transport);
+    Looper.mediaRecorderProvider = mediaRecorderProvider;
+    Looper.transportProvider = transportProvider;
+    Looper.input = micInput;
+
+    Transport.start();
+
+    createLoopWithLengthOf(4, Looper, toneTransportProvider);
+    createLoopWithLengthOf(4, Looper, toneTransportProvider);
+
+    expect(mediaRecorderProvider.loops[0].player.start).toHaveBeenCalledTimes(
+      2
+    );
+    expect(mediaRecorderProvider.loops[1].player.start).toHaveBeenCalledTimes(
+      1
+    );
+
+    Looper.disableLoopByIndex(0);
+
+    playbackFor(4, toneTransportProvider);
+
+    expect(mediaRecorderProvider.loops[0].player.start).toHaveBeenCalledTimes(
+      2
+    );
+    expect(mediaRecorderProvider.loops[1].player.start).toHaveBeenCalledTimes(
+      2
+    );
+  });
 });

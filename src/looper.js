@@ -71,12 +71,18 @@ class Looper {
 
     Looper.loops
       .filter(loop => totalBeats % loop.length === 0)
+      .filter(loop => loop.enabled)
       .forEach(loop =>
         loop.player.start(
           Looper.mediaRecorderProvider.currentTime,
           startTimeOffset
         )
       );
+  }
+
+  static disableLoopByIndex(index) {
+    const loop = Looper.loops[index];
+    loop.enabled = false;
   }
 
   static _throwIfMediaRecorderProvderNotSet() {
