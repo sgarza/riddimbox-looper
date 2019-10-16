@@ -207,9 +207,9 @@ describe("Looper", () => {
       Looper.input = micInput;
 
       Transport.start();
+
       playbackFor(5, toneTransportProvider);
       Looper.mediaRecorderProvider._onDataAvailableHandler({ data: [1, 0] });
-
       expect(Looper.restartRecording).toHaveBeenCalledTimes(1);
     });
 
@@ -227,11 +227,11 @@ describe("Looper", () => {
       Looper.input = micInput;
 
       Transport.start();
+
       Looper.selectCurrentLoop();
       playbackFor(5, toneTransportProvider);
       Looper.mediaRecorderProvider._onDataAvailableHandler({ data: [1, 0] });
       mediaRecorderProvider.engine.Buffer.mock.calls[0][1]();
-
       expect(Looper.restartRecording).toHaveBeenCalledTimes(1);
       expect(Tone.Buffer).toHaveBeenCalledTimes(1);
       expect(Tone.Player).toHaveBeenCalledTimes(1);
@@ -252,7 +252,6 @@ describe("Looper", () => {
       expect(Looper.currentLoopLength).toBe(4);
 
       Looper.increaseCurrentLoopLength();
-
       expect(Looper.currentLoopLength).toBe(8);
     });
 
@@ -272,7 +271,6 @@ describe("Looper", () => {
       for (let index = 0; index < 16; index++) {
         Looper.increaseCurrentLoopLength();
       }
-
       expect(Looper.currentLoopLength).toBe(4);
     });
 
@@ -291,7 +289,6 @@ describe("Looper", () => {
 
       Looper.increaseCurrentLoopLength();
       Looper.decreaseCurrentLoopLength();
-
       expect(Looper.currentLoopLength).toBe(4);
     });
 
@@ -309,7 +306,6 @@ describe("Looper", () => {
       expect(Looper.currentLoopLength).toBe(4);
 
       Looper.decreaseCurrentLoopLength();
-
       expect(Looper.currentLoopLength).toBe(64);
     });
 
@@ -325,14 +321,12 @@ describe("Looper", () => {
       Looper.input = micInput;
 
       Transport.start();
+
       createLoopWithLengthOf(4, Looper, toneTransportProvider);
-
       expect(mediaRecorderProvider.loops).toHaveLength(1);
-
       expect(
         mediaRecorderProvider.loops[0].player.connect
       ).toHaveBeenCalledTimes(1);
-
       expect(
         mediaRecorderProvider.loops[0].player.connect
       ).toHaveBeenCalledWith(Tone.Master);
@@ -355,14 +349,12 @@ describe("Looper", () => {
       }).not.toThrow();
 
       Transport.start();
+
       createLoopWithLengthOf(4, Looper, toneTransportProvider);
-
       expect(mediaRecorderProvider.loops).toHaveLength(1);
-
       expect(
         mediaRecorderProvider.loops[0].player.connect
       ).toHaveBeenCalledTimes(1);
-
       expect(
         mediaRecorderProvider.loops[0].player.connect
       ).toHaveBeenCalledWith(output);
@@ -380,14 +372,12 @@ describe("Looper", () => {
       Looper.input = micInput;
 
       Transport.start();
+
       createLoopWithLengthOf(4, Looper, toneTransportProvider);
-
       expect(mediaRecorderProvider.loops).toHaveLength(1);
-
       expect(
         mediaRecorderProvider.loops[0].player.connect
       ).toHaveBeenCalledTimes(1);
-
       expect(
         mediaRecorderProvider.loops[0].player.connect
       ).toHaveBeenCalledWith(Tone.Master);
@@ -396,18 +386,15 @@ describe("Looper", () => {
       expect(() => {
         Looper.output = output;
       }).not.toThrow();
-
       expect(
         mediaRecorderProvider.loops[0].player.disconnect
       ).toHaveBeenCalledTimes(1);
       expect(
         mediaRecorderProvider.loops[0].player.connect
       ).toHaveBeenCalledTimes(2);
-
       expect(
         mediaRecorderProvider.loops[0].player.disconnect
       ).toHaveBeenCalledWith(Tone.Master);
-
       expect(
         mediaRecorderProvider.loops[0].player.connect
       ).toHaveBeenCalledWith(output);
@@ -425,8 +412,8 @@ describe("Looper", () => {
       Looper.input = micInput;
 
       Transport.start();
-      createLoopWithLengthOf(4, Looper, toneTransportProvider);
 
+      createLoopWithLengthOf(4, Looper, toneTransportProvider);
       expect(mediaRecorderProvider.loops[0].player.start).toHaveBeenCalledTimes(
         1
       );
@@ -448,14 +435,13 @@ describe("Looper", () => {
       Looper.input = micInput;
 
       Transport.start();
-      createLoopWithLengthOf(4, Looper, toneTransportProvider);
 
+      createLoopWithLengthOf(4, Looper, toneTransportProvider);
       expect(mediaRecorderProvider.loops[0].player.start).toHaveBeenCalledTimes(
         1
       );
 
       playbackFor(4, toneTransportProvider);
-
       expect(mediaRecorderProvider.loops[0].player.start).toHaveBeenCalledTimes(
         2
       );
@@ -473,14 +459,13 @@ describe("Looper", () => {
       Looper.input = micInput;
 
       Transport.start();
-      createLoopWithLengthOf(8, Looper, toneTransportProvider);
 
+      createLoopWithLengthOf(8, Looper, toneTransportProvider);
       expect(mediaRecorderProvider.loops[0].player.start).toHaveBeenCalledTimes(
         1
       );
 
       playbackFor(8, toneTransportProvider);
-
       expect(mediaRecorderProvider.loops[0].player.start).toHaveBeenCalledTimes(
         2
       );
@@ -500,17 +485,13 @@ describe("Looper", () => {
       Transport.start();
 
       createLoopWithLengthOf(4, Looper, toneTransportProvider);
-
       expect(mediaRecorderProvider.loops[0].player.start).toHaveBeenCalledTimes(
         1
       );
 
       createLoopWithLengthOf(8, Looper, toneTransportProvider);
-
       expect(mediaRecorderProvider.loops).toHaveLength(2);
-
       playbackFor(8, toneTransportProvider);
-
       expect(mediaRecorderProvider.loops[0].player.start).toHaveBeenCalledTimes(
         5
       );
@@ -535,7 +516,6 @@ describe("Looper", () => {
 
     createLoopWithLengthOf(4, Looper, toneTransportProvider);
     createLoopWithLengthOf(4, Looper, toneTransportProvider);
-
     expect(mediaRecorderProvider.loops[0].player.start).toHaveBeenCalledTimes(
       2
     );
@@ -544,9 +524,7 @@ describe("Looper", () => {
     );
 
     Looper.disableLoopByIndex(0);
-
     playbackFor(4, toneTransportProvider);
-
     expect(mediaRecorderProvider.loops[0].player.start).toHaveBeenCalledTimes(
       2
     );
@@ -569,23 +547,18 @@ describe("Looper", () => {
     Transport.start();
 
     createLoopWithLengthOf(4, Looper, toneTransportProvider);
-
     expect(mediaRecorderProvider.loops[0].player.start).toHaveBeenCalledTimes(
       1
     );
 
     Looper.disableLoopByIndex(0);
-
     playbackFor(4, toneTransportProvider);
-
     expect(mediaRecorderProvider.loops[0].player.start).toHaveBeenCalledTimes(
       1
     );
 
     Looper.enableLoopByIndex(0);
-
     playbackFor(4, toneTransportProvider);
-
     expect(mediaRecorderProvider.loops[0].player.start).toHaveBeenCalledTimes(
       2
     );
