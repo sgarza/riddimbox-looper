@@ -90,6 +90,10 @@ class Looper {
     loop.enabled = false;
   }
 
+  static deleteLoopByIndex(index) {
+    Looper.loops.splice(index, 1);
+  }
+
   static _throwIfMediaRecorderProvderNotSet() {
     if (!Looper._mediaRecorderProvider) {
       throw new Error(

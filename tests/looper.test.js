@@ -563,4 +563,26 @@ describe("Looper", () => {
       2
     );
   });
+
+  it("should delete a specific loop", () => {
+    const mediaRecorderProvider = new ToneMediaRecorderProvider(
+      Tone,
+      MediaRecorder
+    );
+
+    const transportProvider = new RiddimBoxTransportProvider(Transport);
+    Looper.mediaRecorderProvider = mediaRecorderProvider;
+    Looper.transportProvider = transportProvider;
+    Looper.input = micInput;
+
+    Transport.start();
+
+    createLoopWithLengthOf(4, Looper, toneTransportProvider);
+    expect(mediaRecorderProvider.loops[0].player.start).toHaveBeenCalledTimes(
+      1
+    );
+
+    Looper.deleteLoopByIndex(0);
+    expect(mediaRecorderProvider.loops).toHaveLength(0);
+  });
 });
