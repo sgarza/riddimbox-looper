@@ -80,6 +80,11 @@ class Looper {
       );
   }
 
+  static enableLoopByIndex(index) {
+    const loop = Looper.loops[index];
+    loop.enabled = true;
+  }
+
   static disableLoopByIndex(index) {
     const loop = Looper.loops[index];
     loop.enabled = false;
